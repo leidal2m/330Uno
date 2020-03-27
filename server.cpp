@@ -46,6 +46,8 @@ int main()
   pid_t fork_return;
   int status;
 
+  fd_set active_fd_set, read_fd_set;
+
 
   /*
    * Build up our network address. Notice how it is made of machine name + port.
