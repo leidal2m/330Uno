@@ -39,7 +39,6 @@ int main()
   char ch[MAXLINE];                 /* character for i/o */
   int bbf;
   int num_char=MAXLINE;
-  size_t = size;
   char color; //current color
   char number; //current number
   
@@ -57,7 +56,7 @@ int main()
   
   saddr.sin_family = AF_INET;
   saddr.sin_port = htons (PORTNUM);
-  sadder.sin_addr.s_addr = htonl (INADDR_ANY);
+  saddr.sin_addr.s_addr = htonl (INADDR_ANY);
   sock = socket(AF_INET, SOCK_STREAM, 0);
 
   /* Clear the data structure (saddr) to 0's. */
@@ -95,14 +94,14 @@ int main()
   /* Register our address with the system. */
   bind(sock,(struct sockaddr *)&saddr,sizeof(saddr));
 
-  listen(s,1);
+  listen(sock,1);
   
   //initilize active sockets
   FD_ZERO (&active_fd_set);
   FD_SET (sock, &active_fd_set);
   /* Display the port that has been assigned to us. */
   slen = sizeof(saddr);
-  getsockname(s,(struct sockaddr *)&saddr,&slen);
+  getsockname(sock,(struct sockaddr *)&saddr,&slen);
   printf("Socket assigned: %d\n",ntohs(saddr.sin_port));
 
 
@@ -111,7 +110,7 @@ int main()
     read_fd_set = active_fd_set;
     select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
 
-    for(I = 0; I < FD_SETSIZE; I++)
+    for(int i = 0; i < FD_SETSIZE; i++)
     {
       if(FD_ISSET(i, &read_fd_set))
       {
@@ -122,9 +121,12 @@ int main()
         slen = sizeof (saddr);
         sfd = accept(sock,(struct sockaddr *) &saddr, &slen);
         //add the new connection
-        FD_SET (sfd. &active_fd_set);
+        FD_SET (sfd, &active_fd_set);
         while((num_char=read(0,ch,MAXLINE)))
+        {
+          printf("I think this is the server\n");
           write(sfd,ch,num_char);
+        }
 
         }
         else
@@ -132,11 +134,14 @@ int main()
           char buffer[MAXLINE];
           int bytes;
 
-          bytes = read(i, buffer, MAXLINE);
-          fprintf(stderr, "Server got message: \"%s\" \n");
+          while((num_char=read(i,buffer,MAXLINE)))
+          {
+            printf("I think this is the client\n");
+            write(1,ch,num_char);
+          }
 
           close(i);
-          FD_CLR(I);
+          FD_CLR(i, &active_fd_set);
         }
       }
       
