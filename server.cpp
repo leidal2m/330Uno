@@ -47,7 +47,7 @@ int main()
 
   fd_set active_fd_set, read_fd_set;
 
-
+  printf("sock = %d\n", sock);
   /*
    * Build up our network address. Notice how it is made of machine name + port.
    */
@@ -58,7 +58,7 @@ int main()
   saddr.sin_port = htons (PORTNUM);
   saddr.sin_addr.s_addr = htonl (INADDR_ANY);
   sock = socket(AF_INET, SOCK_STREAM, 0);
-
+  printf("sock = %d\n", sock);
   /* Clear the data structure (saddr) to 0's. */
  //memset(&saddr,0,sizeof(saddr));
 
@@ -93,9 +93,9 @@ int main()
 
   /* Register our address with the system. */
   bind(sock,(struct sockaddr *)&saddr,sizeof(saddr));
-
+  printf("sock = %d\n", sock);
   listen(sock,1);
-  
+  printf("sock = %d\n", sock);
   //initilize active sockets
   FD_ZERO (&active_fd_set);
   FD_SET (sock, &active_fd_set);
@@ -103,12 +103,17 @@ int main()
   slen = sizeof(saddr);
   getsockname(sock,(struct sockaddr *)&saddr,&slen);
   printf("Socket assigned: %d\n",ntohs(saddr.sin_port));
-
+  printf("sock = %d\n", sock);
+  
 
   while(1)
   {
     read_fd_set = active_fd_set;
-    select(FD_SETSIZE, &read_fd_set, NULL, NULL, NULL);
+    if (select (FD_SETSIZE, &read_fd_set, NULL, NULL, NULL) < 0)
+        {
+          perror ("select");
+          exit (EXIT_FAILURE);
+        }
 
     for(int i = 0; i < FD_SETSIZE; i++)
     {
@@ -120,13 +125,10 @@ int main()
         int sfd;       /* socket descriptor returned from accept() */
         slen = sizeof (saddr);
         sfd = accept(sock,(struct sockaddr *) &saddr, &slen);
+        printf("sfd = %d\n", sfd);
         //add the new connection
         FD_SET (sfd, &active_fd_set);
-        while((num_char=read(0,ch,MAXLINE)))
-        {
-          printf("I think this is the server\n");
-          write(sfd,ch,num_char);
-        }
+        
 
         }
         else
@@ -134,14 +136,24 @@ int main()
           char buffer[MAXLINE];
           int bytes;
 
-          while((num_char=read(i,buffer,MAXLINE)))
+
+          bytes = read(i, buffer, MAXLINE);
+          if(bytes < 0)
           {
-            printf("I think this is the client\n");
-            write(1,ch,num_char);
+            perror("\"AND YOU KNOW WHAT THE WORST PART OF ALL IS?! I NEVER LEARNED TO READ!\"");
+            exit(EXIT_FAILURE);
+          }
+          else if(bytes == 0)
+          {
+            close(i);
+            FD_CLR(i, &active_fd_set);
+            return -1;
+          }
+          else
+          {
+            fprintf (stderr, "%s", buffer);
           }
 
-          close(i);
-          FD_CLR(i, &active_fd_set);
         }
       }
       
@@ -149,43 +161,5 @@ int main()
     }
 
   }
-
-  //     fork_return = fork();
-
-  //       /* Tell socket to wait for input.  Queue length is 1. */
-
-  //     if(fork_return == 0) //Loudmouth kid process
-  //     {
-  //       /* Wait in the 'accept()' call for a client to make a connection. */
-          
-  //       /*Read from file, write to socket*/
-  //       while((num_char=read(0,ch,MAXLINE))> 0)
-  //         write(sfd,ch,num_char);
-
-  //       close(sfd);
-  //       exit (1);
-  //     }
-  //     else if(fork_return > 0) //Deadbeat dad process
-  //     {
-  //       /*Read from file, write to socket*/
-  //       while((num_char=read(sfd,ch,MAXLINE))> 0 && waitpid(fork_return, &status,WNOHANG)==0)
-  //         write(1,ch,num_char);
-  //     }
-  //     else if(fork_return < 0)//deformed process
-  //     {
-  //       printf("AMBER ALERT\n");
-  //       switch (errno)
-  //       {
-  //           case EAGAIN:
-  //               printf(" \"JASOOOOON, JASON! JAYYY SOOOON!\" (system process limit reached)");
-  //           case ENOMEM:
-  //               printf("\"Are you sure you're not the origammy killer?!\" (out of memory)");
-  //       }
-  //     }
-
-  //     close(sfd);
-  //   }
-
-  // }
   return 0;
 } 
