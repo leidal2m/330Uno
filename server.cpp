@@ -117,6 +117,9 @@ int main()
 
     for(int i = 0; i < FD_SETSIZE; i++)
     {
+      if(i < 10)
+        //printf("current FD is %d\n", i);
+      
       if(FD_ISSET(i, &read_fd_set))
       {
         if (i == sock)
@@ -134,10 +137,15 @@ int main()
         else
         {
           char buffer[MAXLINE];
+          memset(buffer, 0, MAXLINE);
           int bytes;
+          
+          bytes = read(i,buffer,MAXLINE);
+          
 
 
-          bytes = read(i, buffer, MAXLINE);
+
+
           if(bytes < 0)
           {
             perror("\"AND YOU KNOW WHAT THE WORST PART OF ALL IS?! I NEVER LEARNED TO READ!\"");
@@ -151,9 +159,26 @@ int main()
           }
           else
           {
-            fprintf (stderr, "%s", buffer);
+            for(int j = 0; j < FD_SETSIZE; j++)
+            {
+              if(FD_ISSET(j, &active_fd_set))
+              {
+                if(j != i)
+                {
+                  if( j == 0 || j >= 4)
+                  {
+                    fprintf (stderr, "%s", buffer);
+                    write(j, buffer, bytes);
+                  }
+             }
+             }
+            }
+            
+            
+            
           }
-
+          
+          
         }
       }
       
@@ -161,5 +186,42 @@ int main()
     }
 
   }
+
+  //     fork_return = fork();
+
+  //       /* Tell socket to wait for input.  Queue length is 1. */
+
+  //     if(fork_return == 0) //Loudmouth kid process
+  //     {
+  //       /* Wait in the 'accept()' call for a client to make a connection. */
+          
+  //       /*Read from file, write to socket*/
+  //       
+
+  //       close(sfd);
+  //       exit (1);
+  //     }
+  //     else if(fork_return > 0) //Deadbeat dad process
+  //     {
+  //       /*Read from file, write to socket*/
+  //       while((num_char=read(sfd,ch,MAXLINE))> 0 && waitpid(fork_return, &status,WNOHANG)==0)
+  //         write(1,ch,num_char);
+  //     }
+  //     else if(fork_return < 0)//deformed process
+  //     {
+  //       printf("AMBER ALERT\n");
+  //       switch (errno)
+  //       {
+  //           case EAGAIN:
+  //               printf(" \"JASOOOOON, JASON! JAYYY SOOOON!\" (system process limit reached)");
+  //           case ENOMEM:
+  //               printf("\"Are you sure you're not the origammy killer?!\" (out of memory)");
+  //       }
+  //     }
+
+  //     close(sfd);
+  //   }
+
+  // }
   return 0;
 } 
