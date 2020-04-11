@@ -23,12 +23,16 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <string>
+#include <sstream>
+#include <time.h>
 
 /* Use port number 0 so that we can dynamically assign an unused
  * port number. */
 #define PORTNUM         0
 
 #define MAXLINE 512
+
+using namespace std;
 
 int main()
 {
@@ -43,113 +47,121 @@ int main()
   int num_char=MAXLINE;
   char color; //current color
   char number; //current number
+  char *stat;
+  size_t statlength;
   
   pid_t fork_return;
-  int status;
-
   char topcard[2];
   char cards[108][2] = {
-                  "R0",
-                  "R1",
-                  "R1",
-                  "R2",
-                  "R2",
-                  "R3",
-                  "R3",
-                  "R4",
-                  "R4",
-                  "R5",
-                  "R5",
-                  "R6",
-                  "R6",
-                  "R7",
-                  "R7",
-                  "R8",
-                  "R8",
-                  "R9",
-                  "R9",
-                  "RS",
-                  "RS",
-                  "R+",
-                  "R+",
-                  "WD",
-                  "D4",
-                  "B0",
-                  "B1",
-                  "B1",
-                  "B2",
-                  "B2",
-                  "B3",
-                  "B3",
-                  "B4",
-                  "B4",
-                  "B5",
-                  "B5",
-                  "B6",
-                  "B6",
-                  "B7",
-                  "B7",
-                  "B8",
-                  "B8",
-                  "B9",
-                  "B9",
-                  "BS",
-                  "BS",
-                  "B+",
-                  "B+",
-                  "WD",
-                  "D4",
-                  "G0",
-                  "G1",
-                  "G1",
-                  "G2",
-                  "G2",
-                  "G3",
-                  "G3",
-                  "G4",
-                  "G4",
-                  "G5",
-                  "G5",
-                  "G6",
-                  "G6",
-                  "G7",
-                  "G7",
-                  "G8",
-                  "G8",
-                  "G9",
-                  "G9",
-                  "GS",
-                  "GS",
-                  "G+",
-                  "G+",
-                  "WD",
-                  "D4",
-                  "Y0",
-                  "Y1",
-                  "Y1",
-                  "Y2",
-                  "Y2",
-                  "Y3",
-                  "Y3",
-                  "Y4",
-                  "Y4",
-                  "Y5",
-                  "Y5",
-                  "Y6",
-                  "Y6",
-                  "Y7",
-                  "Y7",
-                  "Y8",
-                  "Y8",
-                  "Y9",
-                  "Y9",
-                  "YS",
-                  "YS",
-                  "Y+",
-                  "Y+",
-                  "WD",
-                  "D4",
-                }
+                  'R', '0',
+                  'R', '1',
+                  'R', '1',
+                  'R', '2',
+                  'R', '2',
+                  'R', '3',
+                  'R', '3',
+                  'R', '4',
+                  'R', '4',
+                  'R', '5',
+                  'R', '5',
+                  'R', '6',
+                  'R', '6',
+                  'R', '7',
+                  'R', '7',
+                  'R', '8',
+                  'R', '8',
+                  'R', '9',
+                  'R', '9',
+                  'R', 'S',
+                  'R', 'S',
+                  'R', 'T',
+                  'R', 'T',
+                  'R', '+',
+                  'R', '+',
+                  'W', 'C',
+                  'D', '4',
+                  'Y', '0',
+                  'Y', '1',
+                  'Y', '1',
+                  'Y', '2',
+                  'Y', '2',
+                  'Y', '3',
+                  'Y', '3',
+                  'Y', '4',
+                  'Y', '4',
+                  'Y', '5',
+                  'Y', '5',
+                  'Y', '6',
+                  'Y', '6',
+                  'Y', '7',
+                  'Y', '7',
+                  'Y', '8',
+                  'Y', '8',
+                  'Y', '9',
+                  'Y', '9',
+                  'Y', 'S',
+                  'Y', 'S',
+                  'Y', 'T',
+                  'Y', 'T',
+                  'Y', '+',
+                  'Y', '+',
+                  'W', 'C',
+                  'D', '4',
+                  'G', '0',
+                  'G', '1',
+                  'G', '1',
+                  'G', '2',
+                  'G', '2',
+                  'G', '3',
+                  'G', '3',
+                  'G', '4',
+                  'G', '4',
+                  'G', '5',
+                  'G', '5',
+                  'G', '6',
+                  'G', '6',
+                  'G', '7',
+                  'G', '7',
+                  'G', '8',
+                  'G', '8',
+                  'G', '9',
+                  'G', '9',
+                  'G', 'S',
+                  'G', 'S',
+                  'G', 'T',
+                  'G', 'T',
+                  'G', '+',
+                  'G', '+',
+                  'W', 'C',
+                  'D', '4',
+                  'B', '0',
+                  'B', '1',
+                  'B', '1',
+                  'B', '2',
+                  'B', '2',
+                  'B', '3',
+                  'B', '3',
+                  'B', '4',
+                  'B', '4',
+                  'B', '5',
+                  'B', '5',
+                  'B', '6',
+                  'B', '6',
+                  'B', '7',
+                  'B', '7',
+                  'B', '8',
+                  'B', '8',
+                  'B', '9',
+                  'B', '9',
+                  'B', 'S',
+                  'B', 'S',
+                  'B', 'T',
+                  'B', 'T',
+                  'B', '+',
+                  'B', '+',
+                  'W', 'C',
+                  'D', '4',                  
+                };
   int hand4[108];
   for (int i = 0; i < 108; i++)
   {
@@ -179,13 +191,14 @@ int main()
   for(int i = 0; i < 7; i++)
   {
     bool draw = false;
-    while(draw = false)
+    while(draw == false)
     {
-      int card = rand() % 108
+      srand(time(NULL));
+      int card = rand() % 108;
       if(taken[card] !=1)
       {
-        hand4[card] == 1;
-        taken[card] == 1;
+        hand4[card] = 1;
+        taken[card] = 1;
         draw = true;
       }
     }
@@ -194,13 +207,14 @@ int main()
   for(int i = 0; i < 7; i++)
   {
     bool draw = false;
-    while(draw = false)
+    while(draw == false)
     {
-      int card = rand() % 108
+      srand(time(NULL));
+      int card = rand() % 108;
       if(taken[card] !=1)
       {
-        hand5[card] == 1;
-        taken[card] == 1;
+        hand5[card] = 1;
+        taken[card] = 1;
         draw = true;
       }
     }
@@ -209,13 +223,14 @@ int main()
   for(int i = 0; i < 7; i++)
   {
     bool draw = false;
-    while(draw = false)
+    while(draw == false)
     {
-      int card = rand() % 108
+      srand(time(NULL));
+      int card = rand() % 108;
       if(taken[card] !=1)
       {
-        hand6[card] == 1;
-        taken[card] == 1;
+        hand6[card] = 1;
+        taken[card] = 1;
         draw = true;
       }
     }
@@ -224,31 +239,68 @@ int main()
   for(int i = 0; i < 7; i++)
   {
     bool draw = false;
-    while(draw = false)
+    while(draw == false)
     {
-      int card = rand() % 108
+      srand(time(NULL));
+      int card = rand() % 108;
       if(taken[card] !=1)
       {
-        hand7[card] == 1;
-        taken[card] == 1;
+        hand7[card] = 1;
+        taken[card] = 1;
         draw = true;
       }
     }
   }
 
-  int 4cc = 7;
-  char 4cchar;
-  int 5cc = 7;
-  char 5cchar;
-  int 6cc = 7;
-  char 6cchar;
-  int 7cc = 7;
-  char 7char;
+  for(int i = 0; i < 7; i++)
+  {
+    bool draw = false;
+    while(draw == false)
+    {
+      srand(time(NULL));
+      int card = rand() % 108;
+      if(cards[card][0] == 'D')
+      {
+        draw = false;
+      }
+      else if(cards[card][0] == 'W')
+      {
+        draw = false;
+      }
+      else if(taken[card] !=1)
+      {
+        topcard[0] = cards[card][0];
+        topcard[1] = cards[card][1];
+        taken[card] = 1;
+        draw = true;
+      }
+    }
+  }
 
+  printf("Top card selected is %c%c\n", topcard[0], topcard[1]);
+
+
+  int fourCardCount = 7;
+  char fourCardCharacter[2];
+  int fiveCardCount = 7;
+  char fiveCardCharacter[2];
+  int sixCardCount = 7;
+  char sixCardCharacter[2];
+  int sevenCardCount = 7;
+  char sevenCardCharacter[2];
+  string givestatus;
+  ostringstream ss;
+  string countstring;
+  bool draw2 = false;
+  bool skip = false;
+  bool draw4 = false;
+  bool flip = false;
 
   int uno[4] = {0, 0, 0, 0};
   int calledUno[4] = {0, 0, 0, 0};
   bool playable = false;
+  int turn = 4;
+
 
   fd_set active_fd_set, read_fd_set;
 
@@ -311,7 +363,7 @@ int main()
   printf("sock = %d\n", sock);
   
 
-  int turn = 4;
+  turn = 4;
 
   while(1)
   {
@@ -344,8 +396,14 @@ int main()
         else
         {
           char buffer[MAXLINE];
-          memset(buffer, 0, MAXLINE);
           int bytes;
+          char status1[] = "player 1 currently has";
+          char status2[] = "player 2 currently has";
+          char status3[] = "player 3 currently has";
+          char status4[] = "player 4 currently has";
+          char statusHand[] = "You currently have";
+          memset(buffer, 0, MAXLINE);
+          
           bytes = read(i,buffer,MAXLINE);
 
           
@@ -373,367 +431,4277 @@ int main()
 
               if(FD_ISSET(j, &active_fd_set))
               {
-                
-                if(j != i)
-                {
                   if( j == 0 || j >= 4)
                   {
                     if(FD_ISSET(7, &active_fd_set))
                     {
-                      if(gameset == false)
-                      {
-                        
-                        memset(4cchar, 0, 2);
-                        memset(5cchar, 0, 2);
-                        memset(6cchar, 0, 2);
-                        memset(7cchar, 0, 2);
-                        sprintf(4cchar, "%d", 5cc);
-                        sprintf(5cchar, "%d", 5cc);
-                        sprintf(6cchar, "%d", 5cc);
-                        sprintf(7cchar, "%d", 5cc);
-
-
-                        memset(status, 0, MAXLINE);
-                        char status[MAXLINE] = "player 2 currently has"
-                        if(5cc > 9)
-                          sprintf(status, 5cchar, 2);
-                        else
-                          sprintf(status, 5cchar, 1);
-                        
-                        sprintf(status, " cards\n", 8);
-                        write(4, status, strlen(status))
-
-
-                        memset(status, 0, MAXLINE);
-                        char status[MAXLINE] = "player 3 currently has"
-                        if(6cc > 9)
-                          sprintf(status, 6cchar, 2);
-                        else
-                          sprintf(status, 6cchar, 1);
-                        
-                        sprintf(status, " cards\n", 8);
-                        write(4, status, strlen(status))
-
-                        memset(status, 0, MAXLINE);
-                        char status[MAXLINE] = "player 4 currently has"
-                        if(7cc > 9)
-                          sprintf(status, 7cchar, 2);
-                        else
-                          sprintf(status, 7cchar, 1);
-                        
-                        sprintf(status, " cards\n", 8);
-                        write(4, status, strlen(status))
-
-
-
-
-                        char status[MAXLINE] = "you currently have "
-                        if(4cc > 9)
-                          sprintf(status, 4cchar, 2);
-                        else
-                          sprintf(status, 4cchar, 1);
-                        
-                        sprintf(status, " cards\n", 8);
-                        write(4, status, strlen(status))
-                        char 4hand
-
-
-                        
-
-                        strcpy(4hand, "Your hand: ")
-                        
-                        for(int i = 0; i < 108; i++)
+                        if(turn == 4)
                         {
-                          if(hand4[i] == 1 && taken[i] == 1)
+                          write(4, "It's your turn Player 1\n", strlen("It's your turn Player 1\n"));
+
+                          ss.str(string());
+
+                          ss <<  fiveCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status2);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(4, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sixCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status3);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(4, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sevenCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status4);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(4, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << fourCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(statusHand);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(4, stat, statlength);
+
+                          //DISPLAY TOP CARD
+                          ss.str(string());
+
+                          ss << "Top card:" << topcard[0] << topcard[1] << endl;
+                          givestatus.clear();
+                          givestatus.append(ss.str());
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                         
+
+                          for(int o = 4; o <= 7; o++)
                           {
-                            strncat(4hand, &cards[i][0], 1);
-                            strncat(4hand, &cards[i][1], 1);
-                            sprintf(4hand, "%s%*s", str, 1, "");
+                             write(o, stat, statlength);
                           }
-                        }
-                        strncat(4hand, "\n", 2);
 
-                        write(4, 4hand, strlen("4hand"));
 
-                        if(uno[0] == 1)
-                        {
-                          if(calledUno[0] == 0)
+                          for(int a = 0; a < 108; a++)
                           {
-                            if(buffer[0] == 'C')
+                            if(hand4[a] == 1 && taken[a] == 1)
                             {
-                              write(4, "Uno challenged, draw 2 cards", strlen("Uno challenged, draw 2 cards"));
-                              for(int d = 0; d < 2; i++)
+                              if(topcard[0] == cards[a][0])
                               {
-                              bool draw = false;
-                              while(draw = false)
+                                playable = true;
+                              }
+                              if(topcard[1] == cards[a][1])
                               {
-                                int card = rand() % 108
-                                if(taken[card] !=1)
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'D')
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'W')
+                              {
+                                playable = true;
+                              }
+
+                            }
+                          }
+                          if(draw2 == true)
+                          {
+                            write(4, "You must draw 2\n", strlen("You must draw 2\n"));
+                          }
+                          else if(draw4 == true)
+                          {
+                            write(4, "You must draw 4\n", strlen("You must draw 4\n"));
+                          }
+                          else if(skip == true)
+                          {
+                            write(4, "Your turn has been skipped\n", strlen("Your turn has been skipped\n"));
+                          }
+                          else if(playable == true)
+                          {
+                            write(4, "This is a playable hand\n", strlen("This is a playable hand\n"));
+                          }
+
+                          else if(playable == false)
+                          {
+                            write(4, "This is NOT a playable hand\n", strlen("This is NOT a playable hand\n"));
+                          }
+
+
+                          const char* fourHand = "Your hand: \n";
+
+
+                          
+                          while(turn == 4)
+                          {
+                            char club[MAXLINE];
+
+                            givestatus.clear();
+                            ss.str(string());
+                            for(int b = 0; b < 108; b++)
+                            {
+                              if(hand4[b] == 1 && taken[b] == 1)
+                              {
+                                ss.str(string());
+                                ss << cards[b][0] << cards[b][1] << " ";
+                                givestatus.append(ss.str());
+                              }
+                            }
+                            givestatus.append("\n");
+                            stat = new char[givestatus.length() + 1];
+                            strcpy(stat, givestatus.c_str());
+                            statlength = givestatus.length();
+                            write(4, stat, statlength);
+                           //stat = new char[fourHand.length() + 1];
+                           // statlength = fourHand.length() + 1;
+                            //write(4, stat, statlength);
+
+                            memset(buffer, 0, MAXLINE);
+          
+                            bytes = read(turn,buffer,MAXLINE);
+
+
+
+                            if(uno[0] == 1)
+                            {
+                              if(calledUno[0] == 0)
+                              {
+                                if(buffer[0] == 'C')
                                 {
-                                  hand4[card] == 1;
-                                  taken[card] == 1;
-                                  bool fulldeck = true;
-                                for(int r = 0; r < 108; r++)
-                                {
-                                  if(taken[r] == 0)
+                                  uno[0] = 0;
+                                  write(4, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
                                   {
-                                    fulldeck = false;
-                                  }
-                                }
-                                if(fulldeck = true)
-                                {
-                                  for(int r = 0; r < 108, r++)
-                                  {
-                                    taken[r] = 0;
-                                    if(hand4[r] = 1 ||hand5[r] = 1 ||hand6[r] = 1 ||hand7[r] = 1)
+                                    bool draw = false;
+                                    while(draw == false)
                                     {
-                                      taken[r] = 1;
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fourCardCount++;
+                                        hand4[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        
+                                        draw = true;
+                                      }
                                     }
                                   }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                                draw = true;
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[0] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 1 called uno!\n", strlen("Player 1 called uno!\n"));
+                                  }
                                 }
-                              }
+
                               }
                             }
 
-                          }
-                        }
-
-                        if(uno[1] == 1)
-                        {
-                          if(calledUno[1] == 0)
-                          {
-                            if(buffer[0] == 'C')
+                            if(uno[1] == 1)
                             {
-                              write(5, "Uno challenged, draw 2 cards", strlen("Uno challenged, draw 2 cards"));
-                              for(int d = 0; d < 2; i++)
+                              if(calledUno[1] == 0)
                               {
-                              bool draw = false;
-                              while(draw = false)
-                              {
-                                int card = rand() % 108
-                                if(taken[card] !=1)
+                                if(buffer[0] == 'C')
                                 {
-                                  hand5[card] == 1;
-                                  taken[card] == 1;
-                                  bool fulldeck = true;
-                                for(int r = 0; r < 108; r++)
-                                {
-                                  if(taken[r] == 0)
+                                  uno[1] = 0;
+                                  write(5, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
                                   {
-                                    fulldeck = false;
-                                  }
-                                }
-                                if(fulldeck = true)
-                                {
-                                  for(int r = 0; r < 108, r++)
-                                  {
-                                    taken[r] = 0;
-                                    if(hand4[r] = 1 ||hand5[r] = 1 ||hand6[r] = 1 ||hand7[r] = 1)
+                                    bool draw = false;
+                                    while(draw == false)
                                     {
-                                      taken[r] = 1;
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fiveCardCount++;
+                                        hand5[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
                                     }
                                   }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                                draw = true;
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[1] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 2 called uno!", strlen("Player 2 called uno!"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                              }
+
                               }
                             }
 
-                          }
-                        }
-
-                        if(uno[2] == 1)
-                        {
-                          if(calledUno[2] == 0)
-                          {
-                            if(buffer[0] == 'C')
+                            if(uno[2] == 1)
                             {
-                              write(6, "Uno challenged, draw 2 cards", strlen("Uno challenged, draw 2 cards"));
-                              for(int d = 0; d < 2; i++)
+                              if(calledUno[2] == 0)
                               {
-                              bool draw = false;
-                              while(draw = false)
-                              {
-                                int card = rand() % 108
-                                if(taken[card] !=1)
+                                if(buffer[0] == 'C')
                                 {
-                                  hand6[card] == 1;
-                                  taken[card] == 1;
-                                  bool fulldeck = true;
-                                for(int r = 0; r < 108; r++)
-                                {
-                                  if(taken[r] == 0)
+                                  uno[2] = 0;
+                                  write(6, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
                                   {
-                                    fulldeck = false;
-                                  }
-                                }
-                                if(fulldeck = true)
-                                {
-                                  for(int r = 0; r < 108, r++)
-                                  {
-                                    taken[r] = 0;
-                                    if(hand4[r] = 1 ||hand5[r] = 1 ||hand6[r] = 1 ||hand7[r] = 1)
+                                    bool draw = false;
+                                    while(draw == false)
                                     {
-                                      taken[r] = 1;
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sixCardCount++;
+                                        hand6[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
                                     }
                                   }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                                draw = true;
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[2] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 3 called uno!\n", strlen("Player 3 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                              }
+
                               }
                             }
 
-                          }
-                        }
-
-                        if(uno[3] == 1)
-                        {
-                          if(calledUno[3] == 0)
-                          {
-                            if(buffer[0] == 'C')
+                            if(uno[3] == 1)
                             {
-                              write(7, "Uno challenged, draw 2 cards", strlen("Uno challenged, draw 2 cards"));
-                              for(int d = 0; d < 2; i++)
+                              if(calledUno[3] == 0)
                               {
-                              bool draw = false;
-                              while(draw = false)
-                              {
-                                int card = rand() % 108
-                                if(taken[card] !=1)
+                                if(buffer[0] == 'C')
                                 {
-                                  hand7[card] == 1;
-                                  taken[card] == 1;
-                                  bool fulldeck = true;
-                                for(int r = 0; r < 108; r++)
-                                {
-                                  if(taken[r] == 0)
+                                  uno[3] = 0;
+                                  write(7, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
                                   {
-                                    fulldeck = false;
-                                  }
-                                }
-                                if(fulldeck = true)
-                                {
-                                  for(int r = 0; r < 108, r++)
-                                  {
-                                    taken[r] = 0;
-                                    if(hand4[r] = 1 ||hand5[r] = 1 ||hand6[r] = 1 ||hand7[r] = 1)
+                                    bool draw = false;
+                                    while(draw == false)
                                     {
-                                      taken[r] = 1;
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sevenCardCount++;
+                                        hand7[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
                                     }
+                                    memset(buffer, 0, MAXLINE);
+          
+                                    bytes = read(turn,buffer,MAXLINE);
                                   }
                                 }
-                                draw = true;
-                                }
-                              }
-                              }
-                            }
-
-                          }
-                        }
-                        
-                        for(int a = 0; a < 108; a++)
-                        {
-                          if(hand4[a] == 1 && taken[a] == 1)
-                          {
-                            if(cards[a][0] == topcard[0] && cards[a][1] == topcard[1])
-                            playable = true;
-                          }
-                        }
-                        if (playable == true)
-                        {
-                          if(buffer[0] == 'G' ||buffer[0] == 'Y' ||buffer[0] == 'B' ||buffer[0] == 'R')
-                          {
-                            if(buffer[1] == '0' ||buffer[1] == '1' ||buffer[1] == '2' ||buffer[1] == '3' ||buffer[1] == '4' ||buffer[1] == '5' ||buffer[1] == '6' ||buffer[1] == '7' ||buffer[1] == '8' ||buffer[1] == '9' ||)
-                            for(int a = 0; a < 108; a++)
-                            {
-                              if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
-                              {
-                                if(hand4[a] == 1)
+                                if(buffer[0] == 'U')
                                 {
-                                  hand4[a] == 0;
-                                  char play[MAXLINE] = "Player 1 played: ";
-                                  strncat(play, &cards[a][0], 1);
-                                  strncat(play, &cards[a][1], 1);
-                                  sprintf(play, "\n", 2);
-                                  for(int c = 4; c <= 7 i++)
+                                  calledUno[3] == 1;
+                                  for (int d = 4; d < 7; d++)
                                   {
-                                    write(c, play, strlen(play));
+                                    write(d, "Player 4 called uno!\n", strlen("Player 4 called uno!\n"));
                                   }
-                                  topcard[0] = buffer[0];
-                                  topcard[1] = buffer[1];
-                                  4cc--;
-                                  if(4cc = 1)
-                                  {
-                                    uno[0] = 1;
-                                  }
-                                  if(4cc = 0)
-                                  {
-                                    for(int c = 4; c <= 7 i++)
-                                    {
-                                    write(c, "Player 1 wins!", strlen("Player 1 wins!"));
-                                    close(c);
-                                    FD_CLR(c, &active_fd_set);
-                                    return 1;
-                                    }
-                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
                                 }
-                              }
-                            }
-                          )
 
-
-                          }
-                        }
-                        else
-                        {
-                          for(int c = 4; c <= 7 i++)
-                          {
-                          write(c, "Player 1 draws", strlen("Player 1 draws"));
-                          while(draw = false)
-                            {
-                              int card = rand() % 108
-                              if(taken[card] !=1)
-                              {
-                                hand4[card] == 1;
-                                taken[card] == 1;
-                                bool fulldeck = true;
-                                for(int r = 0; r < 108; r++)
-                                {
-                                  if(taken[r] == 0)
-                                  {
-                                    fulldeck = false;
-                                  }
-                                }
-                                if(fulldeck = true)
-                                {
-                                  for(int r = 0; r < 108, r++)
-                                  {
-                                    taken[r] = 0;
-                                    if(hand4[r] = 1 ||hand5[r] = 1 ||hand6[r] = 1 ||hand7[r] = 1)
-                                    {
-                                      taken[r] = 1;
-                                    }
-                                  }
-                                }
-                                draw = true;
                               }
                             }
                             
-                          }
-                        }
-                        
 
-                      
+                            if (draw2 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 1 draws 2\n", strlen("Player 1 draws 2\n"));
+                              }
+                              for(int z = 0; z < 2; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fourCardCount++;
+                                      hand4[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+  
+                              draw2 = false;
+
+                            }
+                            else if(draw4 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 1 draws 4\n", strlen("Player 1 draws 4\n"));
+                              }
+                              for(int z = 0; z < 4; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fourCardCount++;
+                                      hand4[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              
+                              draw4 = false;
+
+                            }
+                            else if(skip == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 1 turn skipped\n", strlen("Player 1 turn skipped\n"));
+                              }
+                              skip = false;
+
+                            } 
+                            else if (playable == true)
+                            {                                  
+                              if(buffer[0] == 'G' || buffer[0] == 'Y' || buffer[0] == 'B' || buffer[0] == 'R')
+                              {
+                                if(buffer[1] == '0' || buffer[1] == '1' || buffer[1] == '2' || buffer[1] == '3' || buffer[1] == '4' || buffer[1] == '5' || buffer[1] == '6' || buffer[1] == '7' || buffer[1] == '8' || buffer[1] == '9')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand4[a] == 1)
+                                        {
+                                          hand4[a] = 0;
+
+
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fourCardCount--;
+                                          if(fourCardCount == 1)
+                                          {
+                                            uno[0] = 1;
+                                          }
+                                          if(fourCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(4, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == '+')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand4[a] == 1)
+                                        {
+                                          hand4[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fourCardCount--;
+                                          if(fourCardCount == 1)
+                                          {
+                                            uno[0] = 1;
+                                          }
+                                          if(fourCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                            
+                                          }
+                                          draw2 = true;
+                                        }  
+                                      }
+                                      else
+                                      {
+                                        write(4, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'T')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand4[a] == 1)
+                                        {
+                                          hand4[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fourCardCount--;
+                                          if(fourCardCount == 1)
+                                          {
+                                            uno[0] = 1;
+                                          }
+                                          if(fourCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                      
+                                          if(flip == true)
+                                          {
+                                            flip = false;
+                                          }
+                                          else
+                                          {
+                                            flip = true;
+                                          }
+                                          
+                                          
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(4, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'S')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand4[a] == 1)
+                                        {
+                                          hand4[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fourCardCount--;
+                                          if(fourCardCount == 1)
+                                          {
+                                            uno[0] = 1;
+                                          }
+                                          if(fourCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          skip = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(4, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                }
+                                else if(buffer[0] == 'D')
+                                {
+                                  if(buffer[1] == '4')
+                                  {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand4[a] == 1)
+                                      {
+
+                                        hand4[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(4, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(4, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                        }
+                                        fourCardCount--;
+                                        if(fourCardCount == 1)
+                                        {
+                                          uno[0] = 1;
+                                        }
+                                        if(fourCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                        draw4 = true;
+                                      }
+                                    }
+                                  }
+                                  draw4 = true;
+                                }
+                              }
+                              else if(buffer[0] == 'W')
+                              {
+                                if(buffer[1] == 'C')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand4[a] == 1)
+                                      {
+
+                                        hand4[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 1 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(4, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(4, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        fourCardCount--;
+                                        if(fourCardCount == 1)
+                                        {
+                                          uno[0] = 1;
+                                        }
+                                        if(fourCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 1 wins!\n", strlen("Player 1 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                      }
+                                    }
+                                  }
+                                  
+                                }
+                              }
+                              else if(buffer[0] == '\n')
+                              {
+                                for(int c = 4; c <= 7; c++)
+                                {
+                                write(c, "no play available Player 1 draws\n", strlen("no play available Player 1 draws\n"));
+                                }
+                                bool draw = false;
+                                while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fourCardCount++;
+                                      hand4[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck = true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                              }
+                            }
+                            else
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                              write(c, "no play available Player 1 draws\n", strlen("no play available Player 1 draws\n"));
+                              }
+                              bool draw = false;
+                              while(draw == false)
+                                {
+                                  srand(time(NULL));
+                                  int card = rand() % 108;
+                                  if(taken[card] !=1)
+                                  {
+                                    fourCardCount++;
+                                    hand4[card] = 1;
+                                    taken[card] = 1;
+                                    bool fulldeck = true;
+                                    for(int r = 0; r < 108; r++)
+                                    {
+                                      if(taken[r] == 0)
+                                      {
+                                        fulldeck = false;
+                                      }
+                                    }
+                                    if(fulldeck = true)
+                                    {
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        taken[r] = 0;
+                                        if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                        {
+                                          taken[r] = 1;
+                                        }
+                                      }
+                                    }
+                                    draw = true;
+                                  }
+                                }
+                                
+                              
+                            }
+                          
+                          if(flip == true)
+                          {
+                            turn--;
+                            if(turn < 4)
+                            {
+                              turn = 7;
+                            }
+                          }
+                          else
+                          {
+                            turn++;
+                            
+                          }
+
+                          for (int t = 4; t <=7; t++)
+                          {
+                            write(t, "Player 1: end of turn\n", strlen("Player 1: end of turn\n"));
+                          }
+                          playable = false;
+                          
+                        }
+                          
+
+                        }
+
+                        if(turn == 5)
+                        {
+                          write(5, "It's your turn Player 2\n", strlen("It's your turn Player 2\n"));
+                          ss.str(string());
+
+                          ss <<  fourCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status1);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(5, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sixCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status3);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(5, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sevenCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status4);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(5, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << fiveCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(statusHand);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(5, stat, statlength);
+
+                          //DISPLAY TOP CARD
+                          ss.str(string());
+
+                          ss << "Top card:" << topcard[0] << topcard[1] << endl;
+                          givestatus.clear();
+                          givestatus.append(ss.str());
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                         
+
+                          for(int o = 4; o <= 7; o++)
+                          {
+                             write(o, stat, statlength);
+                          }
+
+
+                          for(int a = 0; a < 108; a++)
+                          {
+                            if(hand5[a] == 1 && taken[a] == 1)
+                            {
+                              if(topcard[0] == cards[a][0])
+                              {
+                                playable = true;
+                              }
+                              if(topcard[1] == cards[a][1])
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'D')
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'W')
+                              {
+                                playable = true;
+                              }
+                            }
+                          }
+
+                          if(draw2 == true)
+                          {
+                            write(5, "You must draw 2\n", strlen("You must draw 2\n"));
+                          }
+                          else if(draw4 == true)
+                          {
+                            write(5, "You must draw 4\n", strlen("You must draw 4\n"));
+                          }
+                          else if(skip == true)
+                          {
+                            write(5, "Your turn has been skipped\n", strlen("Your turn has been skipped\n"));
+                          }
+                          else if(playable == true)
+                          {
+                            write(5, "This is a playable hand\n", strlen("This is a playable hand\n"));
+                          }
+
+                          else if(playable == false)
+                          {
+                            write(5, "This is NOT a playable hand\n", strlen("This is NOT a playable hand\n"));
+                          }
+
+
+                          const char* fourHand = "Your hand: \n";
+
+
+                          
+                          while(turn == 5)
+                          {
+ 
+                            char club[MAXLINE];
+
+                            givestatus.clear();
+                            ss.str(string());
+                            for(int b = 0; b < 108; b++)
+                            {
+                              if(hand5[b] == 1 && taken[b] == 1)
+                              {
+                                ss.str(string());
+                                ss << cards[b][0] << cards[b][1] << " ";
+                                givestatus.append(ss.str());
+                              }
+                            }
+                            givestatus.append("\n");
+                            stat = new char[givestatus.length() + 1];
+                            strcpy(stat, givestatus.c_str());
+                            statlength = givestatus.length();
+                            write(5, stat, statlength);
+                           //stat = new char[fourHand.length() + 1];
+                           // statlength = fourHand.length() + 1;
+                            //write(5, stat, statlength);
+
+                            memset(buffer, 0, MAXLINE);
+          
+                            bytes = read(turn,buffer,MAXLINE);
+
+
+
+
+                            if(buffer [0] == 'Z')
+                            {
+                              write(5, "This is a test\n", strlen("This is a test\n"));
+                            }
+                            if(buffer [1] == 'N')
+                            {
+                              write(5, "another test\n", strlen("another test\n"));
+                            }
+
+
+                            if(uno[0] == 1)
+                            {
+                              if(calledUno[0] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[0] = 0;
+                                  write(4, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fourCardCount++;
+                                        hand4[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[0] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 1 called uno!\n", strlen("Player 1 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[1] == 1)
+                            {
+                              if(calledUno[1] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[1] = 0;
+                                  write(5, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fiveCardCount++;
+                                        hand5[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[1] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 2 called uno!\n", strlen("Player 2 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[2] == 1)
+                            {
+                              if(calledUno[2] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[2] = 0;
+                                  write(6, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sixCardCount++;
+                                        hand6[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[2] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 3 called uno!\n", strlen("Player 3 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[3] == 1)
+                            {
+                              if(calledUno[3] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[3] = 0;
+                                  write(7, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sevenCardCount++;
+                                        hand7[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[3] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 4 called uno!\n", strlen("Player 4 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+
+                            if (draw2 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 2 draws 2\n", strlen("Player 2 draws 2\n"));
+                              }
+                              for(int z = 0; z < 2; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fiveCardCount++;
+                                      hand5[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+                              }
+                              draw2 = false;
+
+                            }
+                            else if(draw4 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 2 draws 4\n", strlen("Player 2 draws 4\n"));
+                              }
+                              for(int z = 0; z < 4; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fiveCardCount++;
+                                      hand5[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              draw4 = false;
+
+                            }
+                            else if(skip == true)
+                            {
+                                for(int c = 4; c <= 7; c++)
+                                {
+                                  write(c, "Player 2 turn skipped\n", strlen("Player 2 turn skipped\n"));
+                                }
+                                skip = false;
+
+                            }   
+                            else if (playable == true)
+                            {
+                          
+                              if(buffer[0] == 'G' || buffer[0] == 'Y' || buffer[0] == 'B' || buffer[0] == 'R')
+                              {
+                                if(buffer[1] == '0' || buffer[1] == '1' || buffer[1] == '2' || buffer[1] == '3' || buffer[1] == '4' || buffer[1] == '5' || buffer[1] == '6' || buffer[1] == '7' || buffer[1] == '8' || buffer[1] == '9')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand5[a] == 1)
+                                        {
+                                          hand5[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fiveCardCount--;
+                                          if(fiveCardCount == 1)
+                                          {
+                                            uno[1] = 1;
+                                          }
+                                          if(fiveCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(5, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == '+')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand5[a] == 1)
+                                        {
+                                          hand5[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fiveCardCount--;
+                                          if(fiveCardCount == 1)
+                                          {
+                                            uno[1] = 1;
+                                          }
+                                          if(fiveCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          draw2 = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(5, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'T')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand5[a] == 1)
+                                        {
+                                          hand5[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fiveCardCount--;
+                                          if(fiveCardCount == 1)
+                                          {
+                                            uno[1] = 1;
+                                          }
+                                          if(fiveCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          if(flip == true)
+                                          {
+                                            flip = false;
+                                          }
+                                          else
+                                          {
+                                            flip = true;
+                                          }
+                                          
+                                          
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(5, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'S')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand5[a] == 1)
+                                        {
+                                          hand5[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          fiveCardCount--;
+                                          if(fiveCardCount == 1)
+                                          {
+                                            uno[1] = 1;
+                                          }
+                                          if(fiveCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          skip = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(5, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                }
+                                else if(buffer[0] == 'D')
+                                {
+                                  if(buffer[1] == '4')
+                                  {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand5[a] == 1)
+                                      {
+
+                                        hand5[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(5, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(5, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        fiveCardCount--;
+                                        if(fiveCardCount == 1)
+                                        {
+                                          uno[1] = 1;
+                                        }
+                                        if(fiveCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                        draw4 = true;
+                                      } 
+                                      
+                                    }
+                                  }
+                                 
+                                }
+                              }
+                              else if(buffer[0] == 'W')
+                              {
+                                if(buffer[1] == 'C')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand5[a] == 1)
+                                      {
+
+                                        hand5[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 2 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(5, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(5, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        fiveCardCount--;
+                                        if(fiveCardCount == 1)
+                                        {
+                                          uno[1] = 1;
+                                        }
+                                        if(fiveCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 2 wins!\n", strlen("Player 2 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              else if(buffer[0] == '\n')
+                              {
+                                for(int c = 4; c <= 7; c++)
+                                {
+                                write(c, "no play available Player 2 draws\n", strlen("no play available Player 2 draws\n"));
+                                }
+                                bool draw = false;
+                                while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      fiveCardCount++;
+                                      hand5[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck = true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+                                  
+                                
+                                
+                              }
+                            }
+                            else
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                              write(c, "no play available Player 2 draws\n", strlen("no play available Player 2 draws\n"));
+                              }
+                              bool draw = false;
+                              while(draw == false)
+                                {
+                                  srand(time(NULL));
+                                  int card = rand() % 108;
+                                  if(taken[card] !=1)
+                                  {
+                                    fiveCardCount++;
+                                    hand5[card] = 1;
+                                    taken[card] = 1;
+                                    bool fulldeck = true;
+                                    for(int r = 0; r < 108; r++)
+                                    {
+                                      if(taken[r] == 0)
+                                      {
+                                        fulldeck = false;
+                                      }
+                                    }
+                                    if(fulldeck = true)
+                                    {
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        taken[r] = 0;
+                                        if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                        {
+                                          taken[r] = 1;
+                                        }
+                                      }
+                                    }
+                                    draw = true;
+                                  }
+                                }
+                                
+                              
+                            }
+                          
+                          if(flip == true)
+                          {
+                            turn--;
+                            if(turn < 4)
+                            {
+                              turn = 7;
+                            }
+                          }
+                          else
+                          {
+                              turn++;
+                              if( turn > 7)
+                              {
+                                  turn = 4;
+                              }
+                            
+                            
+                          }
+                          for (int t = 4; t <=7; t++)
+                          {
+                            write(t, "Player 2: end of turn\n", strlen("Player 2: end of turn\n"));
+                          }
+                          playable = false;
+                          
+                        }
+                          
+
+                        }
+
+                        if(turn == 6)
+                        {
+                          write(6, "It's your turn Player 3\n", strlen("It's your turn Player 3\n"));
+
+                          ss.str(string());
+
+                          ss <<  fourCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status1);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(6, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << fiveCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status2);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(6, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sevenCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status4);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(6, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sixCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(statusHand);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(6, stat, statlength);
+
+                          //DISPLAY TOP CARD
+                          ss.str(string());
+
+                          ss << "Top card:" << topcard[0] << topcard[1] << endl;
+                          givestatus.clear();
+                          givestatus.append(ss.str());
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                         
+
+                          for(int o = 4; o <= 7; o++)
+                          {
+                             write(o, stat, statlength);
+                          }
+
+
+                          for(int a = 0; a < 108; a++)
+                          {
+                            if(hand6[a] == 1 && taken[a] == 1)
+                            {
+                              if(topcard[0] == cards[a][0])
+                              {
+                                playable = true;
+                              }
+                              if(topcard[1] == cards[a][1])
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'D')
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'W')
+                              {
+                                playable = true;
+                              }
+                            }
+                          }
+                          if(draw2 == true)
+                          {
+                            write(6, "You must draw 2\n", strlen("You must draw 2\n"));
+                          }
+                          else if(draw4 == true)
+                          {
+                            write(6, "You must draw 4\n", strlen("You must draw 4\n"));
+                          }
+                          else if(skip == true)
+                          {
+                            write(6, "Your turn has been skipped\n", strlen("Your turn has been skipped\n"));
+                          }
+                          else if(playable == true)
+                          {
+                            write(6, "This is a playable hand\n", strlen("This is a playable hand\n"));
+                          }
+
+                          else if(playable == false)
+                          {
+                            write(6, "This is NOT a playable hand\n", strlen("This is NOT a playable hand\n"));
+                          }
+
+
+                          const char* fourHand = "Your hand: \n";
+
+
+                          
+                          while(turn == 6)
+                          {
+                            char club[MAXLINE];
+
+                            givestatus.clear();
+                            ss.str(string());
+                            for(int b = 0; b < 108; b++)
+                            {
+                              if(hand6[b] == 1 && taken[b] == 1)
+                              {
+                                ss.str(string());
+                                ss << cards[b][0] << cards[b][1] << " ";
+                                givestatus.append(ss.str());
+                              }
+                            }
+                            givestatus.append("\n");
+                            stat = new char[givestatus.length() + 1];
+                            strcpy(stat, givestatus.c_str());
+                            statlength = givestatus.length();
+                            write(6, stat, statlength);
+                           //stat = new char[fourHand.length() + 1];
+                           // statlength = fourHand.length() + 1;
+                            //write(6, stat, statlength);
+
+                            memset(buffer, 0, MAXLINE);
+          
+                            bytes = read(turn,buffer,MAXLINE);
+
+
+
+
+                            if(buffer [0] == 'Z')
+                            {
+                              write(6, "This is a test", strlen("This is a test"));
+                            }
+                            if(buffer [1] == 'N')
+                            {
+                              write(6, "another test", strlen("another test"));
+                            }
+
+
+                            if(uno[0] == 1)
+                            {
+                              if(calledUno[0] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[0] = 0;
+                                  write(4, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fourCardCount++;
+                                        hand4[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[0] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 1 called uno!\n", strlen("Player 1 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[1] == 1)
+                            {
+                              if(calledUno[1] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[1] = 0;
+                                  write(5, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fiveCardCount++;
+                                        hand5[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[1] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 2 called uno!\n", strlen("Player 2 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[2] == 1)
+                            {
+                              if(calledUno[2] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[2] = 0;
+                                  write(6, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sixCardCount++;
+                                        hand6[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[2] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 3 called uno!\n", strlen("Player 3 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[3] == 1)
+                            {
+                              if(calledUno[3] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[3] = 0;
+                                  write(7, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sevenCardCount++;
+                                        hand7[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[3] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 4 called uno!\n", strlen("Player 4 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+
+                            if (draw2 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 3 draws 2\n", strlen("Player 3 draws 2\n"));
+                              }
+                              for(int z = 0; z < 2; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sixCardCount++;
+                                      hand6[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              
+                              draw2 = false;
+
+                            }
+                            else if(draw4 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 3 draws 4\n", strlen("Player 3 draws 4\n"));
+                              }
+                              for(int z = 0; z < 4; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sixCardCount++;
+                                      hand6[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              
+                              draw4 = false;
+
+                            }  
+                            else if(skip == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 3 turn skipped\n", strlen("Player 3 turn skipped\n"));
+                              }
+                              skip = false;
+
+                            }           
+                            else if (playable == true)
+                            {      
+                              if(buffer[0] == 'G' || buffer[0] == 'Y' || buffer[0] == 'B' || buffer[0] == 'R')
+                              {
+                                if(buffer[1] == '0' || buffer[1] == '1' || buffer[1] == '2' || buffer[1] == '3' || buffer[1] == '4' || buffer[1] == '5' || buffer[1] == '6' || buffer[1] == '7' || buffer[1] == '8' || buffer[1] == '9')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand6[a] == 1)
+                                        {
+                                          hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sixCardCount--;
+                                          if(sixCardCount == 1)
+                                          {
+                                            uno[2] = 1;
+                                          }
+                                          if(sixCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(6, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == '+')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand6[a] == 1)
+                                        {
+                                          hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sixCardCount--;
+                                          if(sixCardCount == 1)
+                                          {
+                                            uno[2] = 1;
+                                          }
+                                          if(sixCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          draw2 = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(6, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'T')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand6[a] == 1)
+                                        {
+                                          hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sixCardCount--;
+                                          if(sixCardCount == 1)
+                                          {
+                                            uno[2] = 1;
+                                          }
+                                          if(sixCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          if(flip == true)
+                                          {
+                                            flip = false;
+                                          }
+                                          else
+                                          {
+                                            flip = true;
+                                          }
+                                          
+                                          
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(6, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'S')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand6[a] == 1)
+                                        {
+                                          hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sixCardCount--;
+                                          if(sixCardCount == 1)
+                                          {
+                                            uno[2] = 1;
+                                          }
+                                          if(sixCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          skip = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(6, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                }
+                                else if(buffer[0] == 'D')
+                                {
+                                  if(buffer[1] == '4')
+                                  {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand6[a] == 1)
+                                      {
+
+                                        hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(6, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(6, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        sixCardCount--;
+                                        if(sixCardCount == 1)
+                                        {
+                                          uno[2] = 1;
+                                        }
+                                        if(sixCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                        draw4 = true;
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              else if(buffer[0] == 'W')
+                              {
+                                if(buffer[1] == 'C')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand6[a] == 1)
+                                      {
+
+                                        hand6[a] = 0;
+                                          ss.str(string());
+                                          ss << "Player 3 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(6, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(6, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        sixCardCount--;
+                                        if(sixCardCount == 1)
+                                        {
+                                          uno[2] = 1;
+                                        }
+                                        if(sixCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 3 wins!\n", strlen("Player 3 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              else if(buffer[0] == '\n')
+                              {
+                                for(int c = 4; c <= 7; c++)
+                                {
+                                write(c, "no play available Player 3 draws\n", strlen("no play available Player 3 draws\n"));
+                                }
+                                bool draw = false;
+                                while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sixCardCount++;
+                                      hand6[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck = true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+                                  
+                                
+                                
+                              }
+                            }
+                            else
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                              write(c, "no play available Player 3 draws\n", strlen("no play available Player 3 draws\n"));
+                              }
+                              bool draw = false;
+                              while(draw == false)
+                                {
+                                  srand(time(NULL));
+                                  int card = rand() % 108;
+                                  if(taken[card] !=1)
+                                  {
+                                    sixCardCount++;
+                                    hand6[card] = 1;
+                                    taken[card] = 1;
+                                    bool fulldeck = true;
+                                    for(int r = 0; r < 108; r++)
+                                    {
+                                      if(taken[r] == 0)
+                                      {
+                                        fulldeck = false;
+                                      }
+                                    }
+                                    if(fulldeck = true)
+                                    {
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        taken[r] = 0;
+                                        if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                        {
+                                          taken[r] = 1;
+                                        }
+                                      }
+                                    }
+                                    draw = true;
+                                  }
+                                }
+                                
+                              
+                            }
+                          
+                          if(flip == true)
+                          {
+                            turn--;
+                            if(turn < 4)
+                            {
+                              turn = 7;
+                            }
+                          }
+                          else
+                          {
+                              turn++;
+                              if( turn > 7)
+                              {
+                                  turn = 4;
+                              }
+                            
+                            
+                          }
+
+                          for (int t = 4; t <=7; t++)
+                          {
+                            write(t, "Player 3: end of turn\n", strlen("Player 2: end of turn\n"));
+                          }
+                          playable = false;
+                          
+                        }
+                          
+
+                        }
+
+                        if(turn == 7)
+                        {
+                          write(7, "It's your turn Player 4\n", strlen("It's your turn Player 4\n"));
+
+                          ss.str(string());
+
+                          ss <<  fourCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status1);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(7, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << fiveCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status2);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(7, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sixCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(status3);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(7, stat, statlength);
+
+                          ss.str(string());
+
+                          ss << sevenCardCount;
+                          
+                          givestatus.clear();
+                          givestatus.append(statusHand);
+                          givestatus.append(" ");
+                          givestatus.append(ss.str());
+                          givestatus.append(" cards\n");
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                          write(7, stat, statlength);
+
+                          //DISPLAY TOP CARD
+                          ss.str(string());
+
+                          ss << "Top card:" << topcard[0] << topcard[1] << endl;
+                          givestatus.clear();
+                          givestatus.append(ss.str());
+                          stat = new char[givestatus.length() + 1];
+                          strcpy(stat, givestatus.c_str());
+                          statlength = givestatus.length();
+                         
+
+                          for(int o = 4; o <= 7; o++)
+                          {
+                             write(o, stat, statlength);
+                          }
+
+
+                          for(int a = 0; a < 108; a++)
+                          {
+                            if(hand7[a] == 1 && taken[a] == 1)
+                            {
+                              if(topcard[0] == cards[a][0])
+                              {
+                                playable = true;
+                              }
+                              if(topcard[1] == cards[a][1])
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'D')
+                              {
+                                playable = true;
+                              }
+                              if(cards[a][0] == 'W')
+                              {
+                                playable = true;
+                              }
+                            }
+                          }
+                          if(draw2 == true)
+                          {
+                            write(7, "You must draw 2\n", strlen("You must draw 2\n"));
+                          }
+                          else if(draw4 == true)
+                          {
+                            write(7, "You must draw 4\n", strlen("You must draw 4\n"));
+                          }
+                          else if(skip == true)
+                          {
+                            write(7, "Your turn has been skipped\n", strlen("Your turn has been skipped\n"));
+                          }
+                          else if(playable == true)
+                          {
+                            write(7, "This is a playable hand\n", strlen("This is a playable hand\n"));
+                          }
+
+                          else if(playable == false)
+                          {
+                            write(7, "This is NOT a playable hand\n", strlen("This is NOT a playable hand\n"));
+                          }
+
+
+                          const char* fourHand = "Your hand: \n";
+
+
+                          
+                          while(turn == 7)
+                          {
+                            char club[MAXLINE];
+
+                            givestatus.clear();
+                            ss.str(string());
+                            for(int b = 0; b < 108; b++)
+                            {
+                              if(hand7[b] == 1 && taken[b] == 1)
+                              {
+                                ss.str(string());
+                                ss << cards[b][0] << cards[b][1] << " ";
+                                givestatus.append(ss.str());
+                              }
+                            }
+                            givestatus.append("\n");
+                            stat = new char[givestatus.length() + 1];
+                            strcpy(stat, givestatus.c_str());
+                            statlength = givestatus.length();
+                            write(7, stat, statlength);
+                           //stat = new char[fourHand.length() + 1];
+                           // statlength = fourHand.length() + 1;
+                            //write(7, stat, statlength);
+
+                            memset(buffer, 0, MAXLINE);
+          
+                            bytes = read(turn,buffer,MAXLINE);
+
+
+
+
+                            if(buffer [0] == 'Z')
+                            {
+                              write(7, "This is a test", strlen("This is a test"));
+                            }
+                            if(buffer [1] == 'N')
+                            {
+                              write(7, "another test", strlen("another test"));
+                            }
+
+
+                            if(uno[0] == 1)
+                            {
+                              if(calledUno[0] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[0] = 0;
+                                  write(4, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fourCardCount++;
+                                        hand4[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[0] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 1 called uno!\n", strlen("Player 1 called uno!\n"));
+                                  }
+                                }
+                                memset(buffer, 0, MAXLINE);
+          
+                                bytes = read(turn,buffer,MAXLINE);
+
+                              }
+                            }
+
+                            if(uno[1] == 1)
+                            {
+                              if(calledUno[1] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[1] = 0;
+                                  write(5, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  uno[1] = 0;
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        fiveCardCount++;
+                                        hand5[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[1] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 2 called uno!\n", strlen("Player 2 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[2] == 1)
+                            {
+                              if(calledUno[2] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[2] = 0;
+                                  write(6, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sixCardCount++;
+                                        hand6[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[2] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 3 called uno!\n", strlen("Player 3 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+
+                            if(uno[3] == 1)
+                            {
+                              if(calledUno[3] == 0)
+                              {
+                                if(buffer[0] == 'C')
+                                {
+                                  uno[3] = 0;
+                                  write(7, "Uno challenged, draw 2 cards\n", strlen("Uno challenged, draw 2 cards\n"));
+                                  for(int d = 0; d < 2; d++)
+                                  {
+                                    bool draw = false;
+                                    while(draw == false)
+                                    {
+                                      srand(time(NULL));
+                                      int card = rand() % 108;
+                                      if(taken[card] !=1)
+                                      {
+                                        sevenCardCount++;
+                                        hand7[card] = 1;
+                                        taken[card] = 1;
+                                        bool fulldeck = true;
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          if(taken[r] == 0)
+                                          {
+                                            fulldeck = false;
+                                          }
+                                        }
+                                        if(fulldeck = true)
+                                        {
+                                          for(int r = 0; r < 108; r++)
+                                          {
+                                            taken[r] = 0;
+                                            if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                            {
+                                              taken[r] = 1;
+                                            }
+                                          }
+                                        }
+                                        draw = true;
+                                      }
+                                    }
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+                                if(buffer[0] == 'U')
+                                {
+                                  calledUno[3] == 1;
+                                  for (int d = 4; d < 7; d++)
+                                  {
+                                    write(d, "Player 4 called uno!\n", strlen("Player 4 called uno!\n"));
+                                  }
+                                  memset(buffer, 0, MAXLINE);
+          
+                                  bytes = read(turn,buffer,MAXLINE);
+                                }
+
+                              }
+                            }
+                            
+
+                            else if (draw2 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 4 draws 2\n", strlen("Player 4 draws 2\n"));
+                              }
+                              for(int z = 0; z < 2; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sevenCardCount++;
+                                      hand7[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              
+                              draw2 = false;
+
+                            }
+                            else if(draw4 == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 4 draws 4\n", strlen("Player 4 draws 4\n"));
+                              }
+                              for(int z = 0; z < 4; z++)
+                                {
+                                  bool draw = false;
+                                  while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sevenCardCount++;
+                                      hand7[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck == true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+
+                                }
+                              
+                              draw4 = false;
+
+                            }
+                            else if(skip == true)
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                                write(c, "Player 4 turn skipped\n", strlen("Player 4 turn skipped\n"));
+                              }
+                              skip = false;
+
+                            }
+                            else if (playable == true)
+                            {
+                              
+                              if(buffer[0] == 'G' || buffer[0] == 'Y' || buffer[0] == 'B' || buffer[0] == 'R')
+                              {
+                                if(buffer[1] == '0' || buffer[1] == '1' || buffer[1] == '2' || buffer[1] == '3' || buffer[1] == '4' || buffer[1] == '5' || buffer[1] == '6' || buffer[1] == '7' || buffer[1] == '8' || buffer[1] == '9')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand7[a] == 1)
+                                        {
+                                          hand7[a] = 0;
+
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sevenCardCount--;
+                                          if(sevenCardCount == 1)
+                                          {
+                                            uno[3] = 1;
+                                          }
+                                          if(sevenCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(7, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == '+')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand7[a] == 1)
+                                        {
+                                          hand7[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sevenCardCount--;
+                                          if(sevenCardCount == 1)
+                                          {
+                                            uno[3] = 1;
+                                          }
+                                          if(sevenCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          draw2 = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(7, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'T')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand7[a] == 1)
+                                        {
+                                          hand7[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sevenCardCount--;
+                                          if(sevenCardCount == 1)
+                                          {
+                                            uno[3] = 1;
+                                          }
+                                          if(sevenCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          if(flip == true)
+                                          {
+                                            flip = false;
+                                          }
+                                          else
+                                          {
+                                            flip = true;
+                                          }
+                                          
+                                          
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(7, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                else if(buffer[1] == 'S')
+                                {
+                                for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(topcard[0] == buffer[0] || topcard[1] == buffer[1])
+                                      {
+                                        if(hand7[a] == 1)
+                                        {
+                                          hand7[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                          topcard[0] = buffer[0];
+                                          topcard[1] = buffer[1];
+                                          sevenCardCount--;
+                                          if(sevenCardCount == 1)
+                                          {
+                                            uno[3] = 1;
+                                          }
+                                          if(sevenCardCount == 0)
+                                          {
+                                            for(int c = 4; c <= 7; c++)
+                                            {
+                                            write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                            }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                            return 1;
+                                            
+                                          }
+                                          skip = true;
+                                        }
+                                      }
+                                      else
+                                      {
+                                        write(7, "invalid move\n", strlen("invalid move\n"));
+                                      }
+                                      
+
+                                    }
+                                  }
+                                }
+                                }
+                                else if(buffer[0] == 'D')
+                                {
+                                  if(buffer[1] == '4')
+                                  {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand7[a] == 1)
+                                      {
+
+                                        hand7[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(7, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(7, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        sevenCardCount--;
+                                        if(sevenCardCount == 1)
+                                        {
+                                          uno[3] = 1;
+                                        }
+                                        if(sevenCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                        draw4 = true;
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              else if(buffer[0] == 'W')
+                              {
+                                if(buffer[1] == 'C')
+                                {
+                                  for(int a = 0; a < 108; a++)
+                                  {
+                                    if(buffer[0] == cards[a][0] && buffer[1] == cards[a][1])
+                                    {
+                                      if(hand7[a] == 1)
+                                      {
+
+                                        hand7[a] = 0;
+                                          ss.str(string());
+
+                                          ss << "Player 4 Played: " << cards[a][0] << cards[a][1];
+                                          
+                                          givestatus.clear();
+                                          givestatus.append(ss.str());
+                                          givestatus.append("\n");
+                                          stat = new char[givestatus.length() + 1];
+                                          strcpy(stat, givestatus.c_str());
+                                          statlength = givestatus.length();
+                                          write(4, stat, statlength);
+
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                            write(c, stat, statlength);
+                                          }
+                                        bool pick = false;
+                                        while(pick == false)
+                                        {
+                                            write(7, "pick a color\n", strlen("pick a color\n"));
+                                            memset(buffer, 0, MAXLINE);
+                                            bytes = read(7, buffer, MAXLINE);
+                                            if (buffer[0] == 'R' ||buffer[0] == 'G' ||buffer[0] == 'B' ||buffer[0] == 'Y')
+                                            {
+                                              topcard[0] = buffer[0];
+                                              for(int p = 4; p < 7; p++)
+                                              {
+                                                if(topcard[0] == 'R')
+                                                {
+                                                  write(p, "the new color is R\n", strlen("the new color is R\n"));
+                                                }
+                                                if(topcard[0] == 'G')
+                                                {
+                                                  write(p, "the new color is G\n", strlen("the new color is G\n"));
+                                                }
+                                                if(topcard[0] == 'B')
+                                                {
+                                                  write(p, "the new color is B\n", strlen("the new color is B\n"));
+                                                }
+                                                if(topcard[0] == 'Y')
+                                                {
+                                                  write(p, "the new color is Y\n", strlen("the new color is Y\n"));
+                                                }
+                                              }
+                                              pick = true;
+                                            }
+                                          
+                                        }
+                                        sevenCardCount--;
+                                        if(sevenCardCount == 1)
+                                        {
+                                          uno[3] = 1;
+                                        }
+                                        if(sevenCardCount == 0)
+                                        {
+                                          for(int c = 4; c <= 7; c++)
+                                          {
+                                          write(c, "Player 4 wins!\n", strlen("Player 4 wins!\n"));
+                                          }
+                                            close(7);
+                                            close(6);
+                                            close(5);
+                                            close(4);
+                                            FD_CLR(7, &active_fd_set);
+                                            FD_CLR(6, &active_fd_set);
+                                            FD_CLR(5, &active_fd_set);
+                                            FD_CLR(4, &active_fd_set);
+                                          return 1;
+                                          
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                              else if(buffer[0] == '\n')
+                              {
+                                for(int c = 4; c <= 7; c++)
+                                {
+                                write(c, "no play available Player 4 draws\n", strlen("no play available Player 4 draws\n"));
+                                }
+                                bool draw = false;
+                                while(draw == false)
+                                  {
+                                    srand(time(NULL));
+                                    int card = rand() % 108;
+                                    if(taken[card] !=1)
+                                    {
+                                      sevenCardCount++;
+                                      hand7[card] = 1;
+                                      taken[card] = 1;
+                                      bool fulldeck = true;
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        if(taken[r] == 0)
+                                        {
+                                          fulldeck = false;
+                                        }
+                                      }
+                                      if(fulldeck = true)
+                                      {
+                                        for(int r = 0; r < 108; r++)
+                                        {
+                                          taken[r] = 0;
+                                          if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                          {
+                                            taken[r] = 1;
+                                          }
+                                        }
+                                      }
+                                      draw = true;
+                                    }
+                                  }
+                                                              
+                              }
+                            }
+                            else
+                            {
+                              for(int c = 4; c <= 7; c++)
+                              {
+                              write(c, "no play available Player 4 draws\n", strlen("no play available Player 4 draws\n"));
+                              }
+                              bool draw = false;
+                              while(draw == false)
+                                {
+                                  srand(time(NULL));
+                                  int card = rand() % 108;
+                                  if(taken[card] !=1)
+                                  {
+                                    sevenCardCount++;
+                                    hand7[card] = 1;
+                                    taken[card] = 1;
+                                    bool fulldeck = true;
+                                    for(int r = 0; r < 108; r++)
+                                    {
+                                      if(taken[r] == 0)
+                                      {
+                                        fulldeck = false;
+                                      }
+                                    }
+                                    if(fulldeck = true)
+                                    {
+                                      for(int r = 0; r < 108; r++)
+                                      {
+                                        taken[r] = 0;
+                                        if(hand4[r] == 1 ||hand5[r] == 1 ||hand6[r] == 1 ||hand7[r] == 1)
+                                        {
+                                          taken[r] = 1;
+                                        }
+                                      }
+                                    }
+                                    draw = true;
+                                  }
+                                }
+                                
+                              
+                            }
+                          
+                          if(flip == true)
+                          {
+                            turn--;
+                            if(turn < 4)
+                            {
+                              turn = 7;
+                            }
+                          }
+                          else
+                          {
+                              turn++;
+                              if( turn > 7)
+                              {
+                                  turn = 4;
+                              }
+                            
+                            
+                          }
+
+                          for (int t = 4; t <=7; t++)
+                          {
+                            write(t, "Player 4: end of turn\n", strlen("Player 4: end of turn\n"));
+                          }
+                          playable = false;
+                          
+                        }
+                          
+
+                        }
+
+
+
+                      }
                     }
                     
                   }
 
             
-              }
+              
               if(j == i && j >= 4)
               {
                 if(!FD_ISSET(7, &active_fd_set))
@@ -757,42 +4725,3 @@ int main()
     }
 
   }
-
-  //     fork_return = fork();
-
-  //       /* Tell socket to wait for input.  Queue length is 1. */
-
-  //     if(fork_return == 0) //Loudmouth kid process
-  //     {
-  //       /* Wait in the 'accept()' call for a client to make a connection. */
-          
-  //       /*Read from file, write to socket*/
-  //       
-
-  //       close(sfd);
-  //       exit (1);
-  //     }
-  //     else if(fork_return > 0) //Deadbeat dad process
-  //     {
-  //       /*Read from file, write to socket*/
-  //       while((num_char=read(sfd,ch,MAXLINE))> 0 && waitpid(fork_return, &status,WNOHANG)==0)
-  //         write(1,ch,num_char);
-  //     }
-  //     else if(fork_return < 0)//deformed process
-  //     {
-  //       printf("AMBER ALERT\n");
-  //       switch (errno)
-  //       {
-  //           case EAGAIN:
-  //               printf(" \"JASOOOOON, JASON! JAYYY SOOOON!\" (system process limit reached)");
-  //           case ENOMEM:
-  //               printf("\"Are you sure you're not the origammy killer?!\" (out of memory)");
-  //       }
-  //     }
-
-  //     close(sfd);
-  //   }
-
-  // }
-  return 0;
-} 
